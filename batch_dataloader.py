@@ -1,6 +1,7 @@
 import torch
 from torch import _utils
 
+
 class BatchDataLoader(object):
     """Batch Data loader. Takes in a batch dataset and returns iterators that return whole batches of data.
     Arguments:
@@ -15,8 +16,9 @@ class BatchDataLoader(object):
             will be smaller. (default: ``False``)
     """
 
-    def __init__(self, batchdataset, shuffle=False,
-                 pin_memory=False, drop_last=False):
+    def __init__(
+        self, batchdataset, shuffle=False, pin_memory=False, drop_last=False
+    ):
         self.batchdataset = batchdataset
         self.batch_size = batchdataset.batch_size
 
@@ -24,19 +26,22 @@ class BatchDataLoader(object):
         self.pin_memory = pin_memory
         self.drop_last = drop_last
 
-
     def __iter__(self):
         return _BatchDataLoaderIter(self)
 
     def __len__(self):
-        if self.drop_last and self.batchdataset.num_samples%self.batch_size != 0:
-            return len(self.batchdataset)-1
+        if (
+            self.drop_last
+            and self.batchdataset.num_samples % self.batch_size != 0
+        ):
+            return len(self.batchdataset) - 1
         else:
             return len(self.batchdataset)
 
-    
+
 class _BatchDataLoaderIter(object):
     """Iterates once over the BatchDataLoader's batchdataset, shuffling if requested"""
+
     def __init__(self, loader):
         self.batchdataset = loader.batchdataset
         self.batch_size = loader.batch_size
@@ -49,12 +54,14 @@ class _BatchDataLoaderIter(object):
         self.idx = 0
 
     def __len__(self):
-        if self.drop_last and self.batchdataset.num_samples%self.batch_size != 0:
-            return len(self.batchdataset)-1
+        if (
+            self.drop_last
+            and self.batchdataset.num_samples % self.batch_size != 0
+        ):
+            return len(self.batchdataset) - 1
         else:
             return len(self.batchdataset)
-         
-    
+
     def __next__(self):
         if self.idx >= len(self):
             raise StopIteration
@@ -62,7 +69,7 @@ class _BatchDataLoaderIter(object):
         # Note Pinning memory was ~10% _slower_ for the test examples I explored
         if self.pin_memory:
             batch = _utils.pin_memory.pin_memory_batch(batch)
-        self.idx = self.idx+1
+        self.idx = self.idx + 1
         return batch
 
     next = __next__  # Python 2 compatibility
